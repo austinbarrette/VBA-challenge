@@ -1,0 +1,152 @@
+Sub Stock_Analysis()
+
+ ' Set Ws as a worksheet variable.
+    Dim Ws As Worksheet
+    
+    ' Create Loop through Workbook
+    For Each Ws In Worksheets
+    
+        ' Set Variables - PT 1
+        Dim Open_Price As Double
+        Open_Price = 0
+        Dim Close_Price As Double
+        Close_Price = 0
+        Dim Yearly_Price_Change As Double
+        Delta_Price = 0
+        Dim Yearly_Percent_Change As Double
+        Delta_Percent = 0
+        
+        ' Set variables - BONUS
+        Dim MAX_TICKER_NAME As String
+        MAX_TICKER_NAME = " "
+        Dim MIN_TICKER_NAME As String
+        MIN_TICKER_NAME = " "
+        Dim MAX_PERCENT As Double
+        MAX_PERCENT = 0
+        Dim MIN_PERCENT As Double
+        MIN_PERCENT = 0
+        Dim MAX_VOLUME_TICKER As String
+        MAX_VOLUME_TICKER = " "
+        Dim MAX_VOLUME As Double
+        MAX_VOLUME = 0
+        
+        ' Variable for ticker name
+        Dim Ticker As String
+        Ticker = " "
+        
+        ' Set variable for holding totals per ticker name
+        Dim Total_Ticker_Volume As Double
+        Total_Ticker_Volume = 0
+         
+        ' Keep track of the location for each ticker name
+        ' in the summary table for the current worksheet
+        Dim Summary_Table_Row As Long
+        Summary_Table_Row = 2
+        
+        ' Set initial row count for the current worksheet
+        Dim Lastrow As Long
+        Dim i As Long
+        
+        Lastrow = Ws.Cells(Rows.Count, 1).End(xlUp).Row
+
+        ' Headers for PT 1
+            Ws.Range("H1").Value = "Ticker"
+            Ws.Range("I1").Value = "Yearly Change"
+            Ws.Range("J1").Value = "Percent Change"
+            Ws.Range("K1").Value = "Total Stock Volume"
+        ' Headers for PT 2
+            Ws.Range("M2").Value = "Greatest % Increase"
+            Ws.Range("M3").Value = "Greatest % Decrease"
+            Ws.Range("M4").Value = "Greatest Total Volume"
+            Ws.Range("N1").Value = "Ticker"
+            Ws.Range("O1").Value = "Value"
+        
+        ' Identify the beginning of the equation for yearly price change with stating where open price dataset begins
+        Open_Price = Ws.Cells(2, 3).Value
+        
+        ' Loop from beginning for row 2 to last row for all worksheets
+        For i = 2 To Lastrow
+        
+      
+            ' Run through column of ticker dataset until end of ticker column
+            If Ws.Cells(i + 1, 1).Value <> Ws.Cells(i, 1).Value Then
+            
+            'TICKER SYMBOL
+                ' Set ticker to identify data set
+                Ticker = Ws.Cells(i, 1).Value
+                
+                ' Print the Ticker data in the Summary Table, Column H
+                Ws.Range("H" & Summary_Table_Row).Value = Ticker
+            
+            'YEARLY CHANGE
+                ' Calculate Yearly_Price_Change and Yearly_Percent_Change
+                Close_Price = Ws.Cells(i, 6).Value
+                Yearly_Price_Change = Close_Price - Open_Price
+                
+                ' Print the Yearly Change in the Summary Table, Column I
+                Ws.Range("I" & Summary_Table_Row).Value = Yearly_Price_Change
+            
+            'PERCENT CHANGE
+                If Open_Price <> 0 Then
+                    Yearly_Percent_Change = (Yearly_Price_Change / Open_Price) * 100
+                End If
+                ' Print the Percent Change in the Summary Table, Column J
+                Ws.Range("J" & Summary_Table_Row).Value = (CStr(Yearly_Percent_Change) & "%")
+                'Conditional Formatting (Yearly_Percent_Change)
+                If (Yearly_Price_Change > 0) Then
+                    'Fill column with GREEN color - good
+                    Ws.Range("I" & Summary_Table_Row).Interior.ColorIndex = 4
+                ElseIf (Yearly_Price_Change <= 0) Then
+                    'Fill column with RED color - bad
+                    Ws.Range("I" & Summary_Table_Row).Interior.ColorIndex = 3
+                End If
+                
+            'TOTAL STOCK VOLUME
+                ' Calculate total volume of each ticker name
+                Total_Ticker_Volume = Total_Ticker_Volume + Ws.Cells(i, 7).Value
+                ' Print the Total Stock Volume in the Summary Table, Column K
+                Ws.Range("K" & Summary_Table_Row).Value = Total_Ticker_Volume
+                
+            'BEGIN WORKING ON "CHALLENGE"
+                ' Add 1 to the summary table row count
+                Summary_Table_Row = Summary_Table_Row + 1
+                ' Clear Yearly_Price_Change & Close_Price
+                Yearly_Price_Change = 0
+                Close_Price = 0
+                ' Restart next Ticker's Open_Price loop
+                Open_Price = Ws.Cells(i + 1, 3).Value
+              
+                
+            'CALCULATE HOW TO FIND THE 'GREATEST % INCREASE, GREATEST % DECREASE & GREATEST TOTAL VOLUME'
+                If (Yearly_Percent_Change > MAX_PERCENT) Then
+                    MAX_PERCENT = Yearly_Percent_Change
+                    MAX_TICKER_NAME = Ticker
+                ElseIf (Yearly_Percent_Change < MIN_PERCENT) Then
+                    MIN_PERCENT = Yearly_Percent_Change
+                    MIN_TICKER_NAME = Ticker
+                End If
+                       
+                If (Total_Ticker_Volume > MAX_VOLUME) Then
+                    MAX_VOLUME = Total_Ticker_Volume
+                    MAX_VOLUME_TICKER = Ticker
+                End If
+                
+                'Clear Yearly_Percent_Change & Total_Ticker_Volume
+                Yearly_Percent_Change = 0
+                Total_Ticker_Volume = 0
+            
+            End If
+      
+        Next i
+        
+        'BONUS SOLUTION INPUTS
+        Ws.Range("O2").Value = (CStr(MAX_PERCENT) & "%")
+        Ws.Range("O3").Value = (CStr(MIN_PERCENT) & "%")
+        Ws.Range("N2").Value = MAX_TICKER_NAME
+        Ws.Range("N3").Value = MIN_TICKER_NAME
+        Ws.Range("O4").Value = MAX_VOLUME
+        Ws.Range("N4").Value = MAX_VOLUME_TICKER
+        
+     Next Ws
+
+End Sub
